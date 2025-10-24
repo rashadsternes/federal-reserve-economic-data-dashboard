@@ -19,12 +19,12 @@ function ChartCard({ title, data, color, subtitle, loading = false }: ChartCardP
   };
 
   return (
-    <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
-      <div className="mb-2">
-        <h3 className="text-sm font-bold mb-1">{title}</h3>
-        <div className="flex items-center gap-2 mb-2">
+    <div className="bg-white border border-gray-300 rounded-lg p-2.5 shadow-sm max-w-[650px]">
+      <div className="mb-1.5">
+        <h3 className="text-xs font-bold mb-0.5">{title}</h3>
+        <div className="flex items-center gap-1.5 mb-1.5">
           <span className="font-bold text-xs">FRED</span>
-          <span className="text-xs text-gray-600">{subtitle}</span>
+          <span className="text-xs text-gray-500 line-clamp-1">{subtitle}</span>
         </div>
       </div>
 
@@ -38,13 +38,13 @@ function ChartCard({ title, data, color, subtitle, loading = false }: ChartCardP
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fill: '#6B7280', fontSize: 10 }}
+              tick={{ fill: '#6B7280', fontSize: 9 }}
               stroke="#E5E7EB"
               tickLine={false}
               tickFormatter={formatDate}
             />
             <YAxis
-              tick={{ fill: '#6B7280', fontSize: 10 }}
+              tick={{ fill: '#6B7280', fontSize: 9 }}
               stroke="#E5E7EB"
               tickLine={false}
             />
@@ -68,13 +68,13 @@ function ChartCard({ title, data, color, subtitle, loading = false }: ChartCardP
         </ResponsiveContainer>
       )}
 
-      <div className="mt-2 text-xs text-gray-500">
-        <p>Source: Organization for Economic Co-operation and Development via FRED®</p>
-        <p className="text-blue-600 italic">Shaded areas indicate U.S. recessions.</p>
+      <div className="mt-1.5 text-xs text-gray-500">
+        <p className="text-xs">Source: OECD via FRED®</p>
+        <p className="text-blue-600 italic text-xs">Shaded areas indicate U.S. recessions.</p>
       </div>
-      <div className="mt-2 flex justify-end gap-2">
+      <div className="mt-1.5 flex justify-end gap-2 items-center">
         <span className="text-xs text-gray-600">fred.stlouisfed.org</span>
-        <button className="text-xs text-blue-600 border border-blue-600 px-2 py-1 rounded">
+        <button className="text-xs text-blue-600 border border-blue-600 px-1.5 py-0.5 rounded">
           Fullscreen ⛶
         </button>
       </div>
@@ -92,18 +92,18 @@ interface NavItemProps {
 function NavItem({ icon, label, isActive = false, hasDropdown = false }: NavItemProps) {
   return (
     <button
-      className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
+      className={`w-full flex items-center justify-between px-2.5 py-2 text-left transition-colors ${
         isActive
           ? 'bg-blue-600 text-white'
           : 'text-gray-700 hover:bg-gray-100'
       }`}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-lg">{icon}</span>
-        <span className="font-medium">{label}</span>
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm">{icon}</span>
+        <span className="font-medium text-xs">{label}</span>
       </div>
       {hasDropdown && (
-        <span className="text-sm">{isActive ? '⌄' : '›'}</span>
+        <span className="text-xs">{isActive ? '⌄' : '›'}</span>
       )}
     </button>
   );
@@ -148,10 +148,10 @@ export default function Home() {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">FRED Indicators</h1>
-          <p className="text-sm text-gray-600 mt-1">Economic Data Dashboard</p>
+      <aside className="w-48 bg-white border-r border-gray-200 flex flex-col shrink-0">
+        <div className="px-3 py-3 border-b border-gray-200">
+          <h1 className="text-base font-bold text-gray-900">FRED Indicators</h1>
+          <p className="text-xs text-gray-600 mt-0.5">Economic Data Dashboard</p>
         </div>
 
         <nav className="flex-1">
@@ -165,24 +165,23 @@ export default function Home() {
           <NavItem icon="🛒" label="Consumer Spending" hasDropdown={true} />
         </nav>
 
-        <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
-          Data provided by Federal Reserve Economic Data (FRED)
+        <div className="px-3 py-2 border-t border-gray-200 text-xs text-gray-500">
+          Data provided by FRED
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              Economic Indicators Dashboard
-            </h1>
-            <p className="text-gray-600">
-              Real-time economic data from the Federal Reserve Economic Data (FRED) system
-            </p>
-          </div>
+      <main className="flex-1 px-6 py-3">
+        <div className="mb-3">
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            Economic Indicators Dashboard
+          </h1>
+          <p className="text-sm text-gray-600">
+            Real-time economic data from the Federal Reserve Economic Data (FRED) system
+          </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-3">
             <ChartCard
               title="CPI - last five years"
               subtitle="Consumer Price Index: All Items: Total for United States"
@@ -211,7 +210,6 @@ export default function Home() {
               color="#1E40AF"
               loading={rates3MLoading}
             />
-          </div>
         </div>
       </main>
     </div>
