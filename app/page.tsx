@@ -1,302 +1,259 @@
 'use client';
 
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { ChevronRight, TrendingUp, BarChart2, DollarSign, Home, ShoppingCart, Globe, Loader2 } from 'lucide-react';
-import { useFredData } from '@/hooks/useFredData';
-import { FRED_SERIES_IDS } from '@/lib/fred-api';
 
-export default function Dashboard() {
-  const [selectedCategory, setSelectedCategory] = useState('Key Indicators');
+// Mock data for CPI - last five years
+const cpiData = [
+  { date: '2020-01', value: 257.971 },
+  { date: '2020-04', value: 256.389 },
+  { date: '2020-07', value: 259.101 },
+  { date: '2020-10', value: 260.388 },
+  { date: '2021-01', value: 261.582 },
+  { date: '2021-04', value: 267.054 },
+  { date: '2021-07', value: 272.789 },
+  { date: '2021-10', value: 277.948 },
+  { date: '2022-01', value: 281.933 },
+  { date: '2022-04', value: 289.109 },
+  { date: '2022-07', value: 296.276 },
+  { date: '2022-10', value: 298.012 },
+  { date: '2023-01', value: 300.536 },
+  { date: '2023-04', value: 304.127 },
+  { date: '2023-07', value: 307.026 },
+  { date: '2023-10', value: 307.671 },
+  { date: '2024-01', value: 310.326 },
+  { date: '2024-04', value: 313.548 },
+  { date: '2024-07', value: 314.540 },
+  { date: '2024-10', value: 315.625 },
+];
 
-  // Calculate date range for last 2 years
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setFullYear(startDate.getFullYear() - 2);
-  
-  const dateRange = {
-    start: startDate.toISOString().split('T')[0],
-    end: endDate.toISOString().split('T')[0]
-  };
+// Mock data for Labor Statistics - Unemployment Rate
+const laborData = [
+  { date: '2020-01', value: 3.5 },
+  { date: '2020-04', value: 14.7 },
+  { date: '2020-07', value: 10.2 },
+  { date: '2020-10', value: 6.9 },
+  { date: '2021-01', value: 6.3 },
+  { date: '2021-04', value: 6.1 },
+  { date: '2021-07', value: 5.4 },
+  { date: '2021-10', value: 4.6 },
+  { date: '2022-01', value: 4.0 },
+  { date: '2022-04', value: 3.6 },
+  { date: '2022-07', value: 3.5 },
+  { date: '2022-10', value: 3.7 },
+  { date: '2023-01', value: 3.4 },
+  { date: '2023-04', value: 3.4 },
+  { date: '2023-07', value: 3.8 },
+  { date: '2023-10', value: 3.7 },
+  { date: '2024-01', value: 3.7 },
+  { date: '2024-04', value: 3.9 },
+  { date: '2024-07', value: 4.3 },
+  { date: '2024-10', value: 4.1 },
+];
 
-  // Fetch real data from FRED API
-  const { data: cpiData, loading: cpiLoading } = useFredData(
-    FRED_SERIES_IDS.CPI, 
-    dateRange.start, 
-    dateRange.end
-  );
-  
-  const { data: unemploymentData, loading: unemploymentLoading } = useFredData(
-    FRED_SERIES_IDS.UNEMPLOYMENT, 
-    dateRange.start, 
-    dateRange.end
-  );
-  
-  const { data: treasury10YData, loading: treasury10YLoading } = useFredData(
-    FRED_SERIES_IDS.TREASURY_10Y, 
-    dateRange.start, 
-    dateRange.end
-  );
-  
-  const { data: treasury3MData, loading: treasury3MLoading } = useFredData(
-    FRED_SERIES_IDS.TREASURY_3M, 
-    dateRange.start, 
-    dateRange.end
-  );
+// Mock data for Interest Rates - 10-Year
+const interestRates10Year = [
+  { date: '2020-01', value: 1.64 },
+  { date: '2020-04', value: 0.64 },
+  { date: '2020-07', value: 0.55 },
+  { date: '2020-10', value: 0.88 },
+  { date: '2021-01', value: 1.11 },
+  { date: '2021-04', value: 1.63 },
+  { date: '2021-07', value: 1.25 },
+  { date: '2021-10', value: 1.55 },
+  { date: '2022-01', value: 1.78 },
+  { date: '2022-04', value: 2.89 },
+  { date: '2022-07', value: 2.65 },
+  { date: '2022-10', value: 4.05 },
+  { date: '2023-01', value: 3.51 },
+  { date: '2023-04', value: 3.47 },
+  { date: '2023-07', value: 3.96 },
+  { date: '2023-10', value: 4.93 },
+  { date: '2024-01', value: 4.14 },
+  { date: '2024-04', value: 4.62 },
+  { date: '2024-07', value: 4.24 },
+  { date: '2024-10', value: 4.28 },
+];
 
-  const sidebarItems = [
-    { name: 'Key Indicators', icon: BarChart2 },
-    { name: 'Inflation', icon: TrendingUp },
-    { name: 'Employment', icon: BarChart2 },
-    { name: 'Interest Rates', icon: BarChart2 },
-    { name: 'Economic Growth', icon: TrendingUp },
-    { name: 'Exchange Rates', icon: Globe },
-    { name: 'Housing', icon: Home },
-    { name: 'Consumer Spending', icon: ShoppingCart },
-  ];
+// Mock data for Interest Rates - 3-Month
+const interestRates3Month = [
+  { date: '2020-01', value: 1.57 },
+  { date: '2020-04', value: 0.12 },
+  { date: '2020-07', value: 0.10 },
+  { date: '2020-10', value: 0.09 },
+  { date: '2021-01', value: 0.07 },
+  { date: '2021-04', value: 0.02 },
+  { date: '2021-07', value: 0.05 },
+  { date: '2021-10', value: 0.05 },
+  { date: '2022-01', value: 0.21 },
+  { date: '2022-04', value: 0.89 },
+  { date: '2022-07', value: 2.18 },
+  { date: '2022-10', value: 4.02 },
+  { date: '2023-01', value: 4.64 },
+  { date: '2023-04', value: 5.07 },
+  { date: '2023-07', value: 5.50 },
+  { date: '2023-10', value: 5.50 },
+  { date: '2024-01', value: 5.42 },
+  { date: '2024-04', value: 5.36 },
+  { date: '2024-07', value: 5.27 },
+  { date: '2024-10', value: 4.64 },
+];
 
-  const formatXAxisDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-  };
+interface ChartCardProps {
+  title: string;
+  data: Array<{ date: string; value: number }>;
+  color: string;
+  subtitle: string;
+}
 
-  const formatTooltipDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  };
-
+function ChartCard({ title, data, color, subtitle }: ChartCardProps) {
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
-        <div className="p-6">
-          <h1 className="text-xl font-bold text-gray-900">FRED Indicators</h1>
-          <p className="text-sm text-gray-500 mt-1">Economic Data Dashboard</p>
-        </div>
-        <nav className="flex-1 overflow-y-auto">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => setSelectedCategory(item.name)}
-              className={`w-full flex items-center justify-between px-6 py-3 text-sm transition-colors ${
-                selectedCategory === item.name
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className="w-4 h-4" />
-                <span>{item.name}</span>
-              </div>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          ))}
-        </nav>
-        <div className="p-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
-            Data provided by Federal Reserve<br />
-            Economic Data (FRED)
-          </p>
+    <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+      <div className="mb-2">
+        <h3 className="text-sm font-bold mb-1">{title}</h3>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="font-bold text-xs">FRED</span>
+          <span className="text-xs text-gray-600">{subtitle}</span>
         </div>
       </div>
+      <ResponsiveContainer width="100%" height={180}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+          <XAxis
+            dataKey="date"
+            tick={{ fill: '#6B7280', fontSize: 10 }}
+            stroke="#E5E7EB"
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fill: '#6B7280', fontSize: 10 }}
+            stroke="#E5E7EB"
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#fff',
+              border: '1px solid #E5E7EB',
+              borderRadius: '4px',
+              fontSize: '12px'
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <div className="mt-2 text-xs text-gray-500">
+        <p>Source: Organization for Economic Co-operation and Development via FRED®</p>
+        <p className="text-blue-600 italic">Shaded areas indicate U.S. recessions.</p>
+      </div>
+      <div className="mt-2 flex justify-end gap-2">
+        <span className="text-xs text-gray-600">fred.stlouisfed.org</span>
+        <button className="text-xs text-blue-600 border border-blue-600 px-2 py-1 rounded">
+          Fullscreen ⛶
+        </button>
+      </div>
+    </div>
+  );
+}
+
+interface NavItemProps {
+  icon: string;
+  label: string;
+  isActive?: boolean;
+  hasDropdown?: boolean;
+}
+
+function NavItem({ icon, label, isActive = false, hasDropdown = false }: NavItemProps) {
+  return (
+    <button
+      className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
+        isActive
+          ? 'bg-blue-600 text-white'
+          : 'text-gray-700 hover:bg-gray-100'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-lg">{icon}</span>
+        <span className="font-medium">{label}</span>
+      </div>
+      {hasDropdown && (
+        <span className="text-sm">{isActive ? '⌄' : '›'}</span>
+      )}
+    </button>
+  );
+}
+
+export default function Home() {
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">FRED Indicators</h1>
+          <p className="text-sm text-gray-600 mt-1">Economic Data Dashboard</p>
+        </div>
+
+        <nav className="flex-1">
+          <NavItem icon="📊" label="Key Indicators" isActive={true} hasDropdown={true} />
+          <NavItem icon="📈" label="Inflation" hasDropdown={true} />
+          <NavItem icon="💼" label="Employment" hasDropdown={true} />
+          <NavItem icon="📉" label="Interest Rates" hasDropdown={true} />
+          <NavItem icon="📈" label="Economic Growth" hasDropdown={true} />
+          <NavItem icon="🌐" label="Exchange Rates" hasDropdown={true} />
+          <NavItem icon="🏠" label="Housing" hasDropdown={true} />
+          <NavItem icon="🛒" label="Consumer Spending" hasDropdown={true} />
+        </nav>
+
+        <div className="p-4 border-t border-gray-200 text-xs text-gray-500">
+          Data provided by Federal Reserve Economic Data (FRED)
+        </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto bg-gray-100">
-        <div className="p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Economic Indicators Dashboard</h2>
-          <p className="text-gray-600 mb-8">Real-time economic data from the Federal Reserve Economic Data (FRED) system</p>
+      <main className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Economic Indicators Dashboard
+            </h1>
+            <p className="text-gray-600">
+              Real-time economic data from the Federal Reserve Economic Data (FRED) system
+            </p>
+          </div>
 
-          {/* Charts Grid */}
           <div className="grid grid-cols-2 gap-6">
-            {/* CPI Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-base font-semibold text-gray-800 mb-4">Consumer Price Index (CPI)</h3>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm font-medium text-gray-900">FRED</span>
-                <span className="text-xs text-gray-500">All Urban Consumers: All Items (CPIAUCSL)</span>
-              </div>
-              {cpiLoading ? (
-                <div className="h-[250px] flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={cpiData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={formatXAxisDate}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      domain={['dataMin - 5', 'dataMax + 5']}
-                    />
-                    <Tooltip 
-                      labelFormatter={formatTooltipDate}
-                      formatter={(value: number) => value.toFixed(2)}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#3b82f6" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="CPI"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                <span>Last Updated: {new Date().toLocaleDateString()}</span>
-                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.CPI}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
-              </div>
-            </div>
-
-            {/* Unemployment Rate Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-base font-semibold text-gray-800 mb-4">Unemployment Rate</h3>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm font-medium text-gray-900">FRED</span>
-                <span className="text-xs text-gray-500">Civilian Unemployment Rate (UNRATE)</span>
-              </div>
-              {unemploymentLoading ? (
-                <div className="h-[250px] flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={unemploymentData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={formatXAxisDate}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      domain={[0, 'dataMax + 1']}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip 
-                      labelFormatter={formatTooltipDate}
-                      formatter={(value: number) => `${value.toFixed(1)}%`}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#10b981" 
-                      fill="#86efac"
-                      strokeWidth={2}
-                      name="Unemployment Rate"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                <span>Last Updated: {new Date().toLocaleDateString()}</span>
-                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.UNEMPLOYMENT}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
-              </div>
-            </div>
-
-            {/* 10-Year Treasury Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-base font-semibold text-gray-800 mb-4">10-Year Treasury Yield</h3>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm font-medium text-gray-900">FRED</span>
-                <span className="text-xs text-gray-500">Market Yield on U.S. Treasury Securities (DGS10)</span>
-              </div>
-              {treasury10YLoading ? (
-                <div className="h-[250px] flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={treasury10YData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={formatXAxisDate}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      domain={['dataMin - 0.5', 'dataMax + 0.5']}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip 
-                      labelFormatter={formatTooltipDate}
-                      formatter={(value: number) => `${value.toFixed(2)}%`}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#8b5cf6" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="10-Year Yield"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                <span>Last Updated: {new Date().toLocaleDateString()}</span>
-                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.TREASURY_10Y}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
-              </div>
-            </div>
-
-            {/* 3-Month Treasury Chart */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="text-base font-semibold text-gray-800 mb-4">3-Month Treasury Yield</h3>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm font-medium text-gray-900">FRED</span>
-                <span className="text-xs text-gray-500">Market Yield on U.S. Treasury Securities (DGS3MO)</span>
-              </div>
-              {treasury3MLoading ? (
-                <div className="h-[250px] flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={treasury3MData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="date" 
-                      tick={{ fontSize: 12 }}
-                      tickFormatter={formatXAxisDate}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 12 }}
-                      domain={['dataMin - 0.5', 'dataMax + 0.5']}
-                      tickFormatter={(value) => `${value}%`}
-                    />
-                    <Tooltip 
-                      labelFormatter={formatTooltipDate}
-                      formatter={(value: number) => `${value.toFixed(2)}%`}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#f59e0b" 
-                      strokeWidth={2}
-                      dot={false}
-                      name="3-Month Yield"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-              <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                <span>Last Updated: {new Date().toLocaleDateString()}</span>
-                <a href={`https://fred.stlouisfed.org/series/${FRED_SERIES_IDS.TREASURY_3M}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Details →</a>
-              </div>
-            </div>
+            <ChartCard
+              title="CPI - last five years"
+              subtitle="Consumer Price Index: All Items: Total for United States"
+              data={cpiData}
+              color="#1E40AF"
+            />
+            <ChartCard
+              title="Infra-Annual Labor Statistics: Unemployment Rate Total"
+              subtitle="Infra-Annual Labor Statistics: Unemployment Rate Total: From 15 to 64 Years for United States"
+              data={laborData}
+              color="#1E40AF"
+            />
+            <ChartCard
+              title="Interest Rates: Long-Term Government Bond Yields: 10-Year"
+              subtitle="Interest Rates: Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for United States"
+              data={interestRates10Year}
+              color="#1E40AF"
+            />
+            <ChartCard
+              title="Interest Rates: 3-Month or 90-Day Rates and Yields"
+              subtitle="Interest Rates: 3-Month or 90-Day Rates and Yields: Interbank Rates: Total for United States"
+              data={interestRates3Month}
+              color="#1E40AF"
+            />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
