@@ -1,112 +1,23 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useState } from 'react';
-
-// Mock data for CPI - last five years
-const cpiData = [
-  { date: '2020-01', value: 257.971 },
-  { date: '2020-04', value: 256.389 },
-  { date: '2020-07', value: 259.101 },
-  { date: '2020-10', value: 260.388 },
-  { date: '2021-01', value: 261.582 },
-  { date: '2021-04', value: 267.054 },
-  { date: '2021-07', value: 272.789 },
-  { date: '2021-10', value: 277.948 },
-  { date: '2022-01', value: 281.933 },
-  { date: '2022-04', value: 289.109 },
-  { date: '2022-07', value: 296.276 },
-  { date: '2022-10', value: 298.012 },
-  { date: '2023-01', value: 300.536 },
-  { date: '2023-04', value: 304.127 },
-  { date: '2023-07', value: 307.026 },
-  { date: '2023-10', value: 307.671 },
-  { date: '2024-01', value: 310.326 },
-  { date: '2024-04', value: 313.548 },
-  { date: '2024-07', value: 314.540 },
-  { date: '2024-10', value: 315.625 },
-];
-
-// Mock data for Labor Statistics - Unemployment Rate
-const laborData = [
-  { date: '2020-01', value: 3.5 },
-  { date: '2020-04', value: 14.7 },
-  { date: '2020-07', value: 10.2 },
-  { date: '2020-10', value: 6.9 },
-  { date: '2021-01', value: 6.3 },
-  { date: '2021-04', value: 6.1 },
-  { date: '2021-07', value: 5.4 },
-  { date: '2021-10', value: 4.6 },
-  { date: '2022-01', value: 4.0 },
-  { date: '2022-04', value: 3.6 },
-  { date: '2022-07', value: 3.5 },
-  { date: '2022-10', value: 3.7 },
-  { date: '2023-01', value: 3.4 },
-  { date: '2023-04', value: 3.4 },
-  { date: '2023-07', value: 3.8 },
-  { date: '2023-10', value: 3.7 },
-  { date: '2024-01', value: 3.7 },
-  { date: '2024-04', value: 3.9 },
-  { date: '2024-07', value: 4.3 },
-  { date: '2024-10', value: 4.1 },
-];
-
-// Mock data for Interest Rates - 10-Year
-const interestRates10Year = [
-  { date: '2020-01', value: 1.64 },
-  { date: '2020-04', value: 0.64 },
-  { date: '2020-07', value: 0.55 },
-  { date: '2020-10', value: 0.88 },
-  { date: '2021-01', value: 1.11 },
-  { date: '2021-04', value: 1.63 },
-  { date: '2021-07', value: 1.25 },
-  { date: '2021-10', value: 1.55 },
-  { date: '2022-01', value: 1.78 },
-  { date: '2022-04', value: 2.89 },
-  { date: '2022-07', value: 2.65 },
-  { date: '2022-10', value: 4.05 },
-  { date: '2023-01', value: 3.51 },
-  { date: '2023-04', value: 3.47 },
-  { date: '2023-07', value: 3.96 },
-  { date: '2023-10', value: 4.93 },
-  { date: '2024-01', value: 4.14 },
-  { date: '2024-04', value: 4.62 },
-  { date: '2024-07', value: 4.24 },
-  { date: '2024-10', value: 4.28 },
-];
-
-// Mock data for Interest Rates - 3-Month
-const interestRates3Month = [
-  { date: '2020-01', value: 1.57 },
-  { date: '2020-04', value: 0.12 },
-  { date: '2020-07', value: 0.10 },
-  { date: '2020-10', value: 0.09 },
-  { date: '2021-01', value: 0.07 },
-  { date: '2021-04', value: 0.02 },
-  { date: '2021-07', value: 0.05 },
-  { date: '2021-10', value: 0.05 },
-  { date: '2022-01', value: 0.21 },
-  { date: '2022-04', value: 0.89 },
-  { date: '2022-07', value: 2.18 },
-  { date: '2022-10', value: 4.02 },
-  { date: '2023-01', value: 4.64 },
-  { date: '2023-04', value: 5.07 },
-  { date: '2023-07', value: 5.50 },
-  { date: '2023-10', value: 5.50 },
-  { date: '2024-01', value: 5.42 },
-  { date: '2024-04', value: 5.36 },
-  { date: '2024-07', value: 5.27 },
-  { date: '2024-10', value: 4.64 },
-];
+import { useFredData } from '@/hooks/useFredData';
+import { FRED_SERIES_IDS } from '@/lib/fred-api';
 
 interface ChartCardProps {
   title: string;
   data: Array<{ date: string; value: number }>;
   color: string;
   subtitle: string;
+  loading?: boolean;
 }
 
-function ChartCard({ title, data, color, subtitle }: ChartCardProps) {
+function ChartCard({ title, data, color, subtitle, loading = false }: ChartCardProps) {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
   return (
     <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
       <div className="mb-2">
@@ -116,37 +27,47 @@ function ChartCard({ title, data, color, subtitle }: ChartCardProps) {
           <span className="text-xs text-gray-600">{subtitle}</span>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={180}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-          <XAxis
-            dataKey="date"
-            tick={{ fill: '#6B7280', fontSize: 10 }}
-            stroke="#E5E7EB"
-            tickLine={false}
-          />
-          <YAxis
-            tick={{ fill: '#6B7280', fontSize: 10 }}
-            stroke="#E5E7EB"
-            tickLine={false}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #E5E7EB',
-              borderRadius: '4px',
-              fontSize: '12px'
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+
+      {loading ? (
+        <div className="h-[180px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={180}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: '#6B7280', fontSize: 10 }}
+              stroke="#E5E7EB"
+              tickLine={false}
+              tickFormatter={formatDate}
+            />
+            <YAxis
+              tick={{ fill: '#6B7280', fontSize: 10 }}
+              stroke="#E5E7EB"
+              tickLine={false}
+            />
+            <Tooltip
+              labelFormatter={formatDate}
+              contentStyle={{
+                backgroundColor: '#fff',
+                border: '1px solid #E5E7EB',
+                borderRadius: '4px',
+                fontSize: '12px'
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke={color}
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+
       <div className="mt-2 text-xs text-gray-500">
         <p>Source: Organization for Economic Co-operation and Development via FRED®</p>
         <p className="text-blue-600 italic">Shaded areas indicate U.S. recessions.</p>
@@ -189,6 +110,41 @@ function NavItem({ icon, label, isActive = false, hasDropdown = false }: NavItem
 }
 
 export default function Home() {
+  // Calculate date range for last 5 years
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setFullYear(startDate.getFullYear() - 5);
+
+  const dateRange = {
+    start: startDate.toISOString().split('T')[0],
+    end: endDate.toISOString().split('T')[0]
+  };
+
+  // Fetch real FRED data
+  const { data: cpiData, loading: cpiLoading } = useFredData(
+    FRED_SERIES_IDS.CPI,
+    dateRange.start,
+    dateRange.end
+  );
+
+  const { data: laborData, loading: laborLoading } = useFredData(
+    FRED_SERIES_IDS.UNEMPLOYMENT,
+    dateRange.start,
+    dateRange.end
+  );
+
+  const { data: interestRates10YearData, loading: rates10YLoading } = useFredData(
+    FRED_SERIES_IDS.TREASURY_10Y,
+    dateRange.start,
+    dateRange.end
+  );
+
+  const { data: interestRates3MonthData, loading: rates3MLoading } = useFredData(
+    FRED_SERIES_IDS.TREASURY_3M,
+    dateRange.start,
+    dateRange.end
+  );
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -232,24 +188,28 @@ export default function Home() {
               subtitle="Consumer Price Index: All Items: Total for United States"
               data={cpiData}
               color="#1E40AF"
+              loading={cpiLoading}
             />
             <ChartCard
               title="Infra-Annual Labor Statistics: Unemployment Rate Total"
               subtitle="Infra-Annual Labor Statistics: Unemployment Rate Total: From 15 to 64 Years for United States"
               data={laborData}
               color="#1E40AF"
+              loading={laborLoading}
             />
             <ChartCard
               title="Interest Rates: Long-Term Government Bond Yields: 10-Year"
               subtitle="Interest Rates: Long-Term Government Bond Yields: 10-Year: Main (Including Benchmark) for United States"
-              data={interestRates10Year}
+              data={interestRates10YearData}
               color="#1E40AF"
+              loading={rates10YLoading}
             />
             <ChartCard
               title="Interest Rates: 3-Month or 90-Day Rates and Yields"
               subtitle="Interest Rates: 3-Month or 90-Day Rates and Yields: Interbank Rates: Total for United States"
-              data={interestRates3Month}
+              data={interestRates3MonthData}
               color="#1E40AF"
+              loading={rates3MLoading}
             />
           </div>
         </div>
